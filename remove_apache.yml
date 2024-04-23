@@ -8,9 +8,9 @@
     apt:
       update_cache: yes  
 
-  - name: Remove apache2 package
+  - name: Remove nginx package
     apt:
-      name: apache2
+      name: nginx
       state: absent
 
   - name: Add php support for Apache
