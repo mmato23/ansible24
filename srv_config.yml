@@ -1,0 +1,48 @@
+---
+
+- hosts: all
+  become: true
+  tasks:
+
+
+- hosts: web_servers
+  become: true
+  tasks:  
+
+
+  - name: Install apache2 and support packages
+    apt:
+      update_cache: yes
+      name:
+        - apache2
+        - libapache2-mod-php 
+      state: latest
+    when: ansible_distribution == "Ubuntu"
+
+
+
+
+  - name: Install apache2 and support packages
+    dnf:
+      update_cache: yes
+      name:
+        - httpd
+        - php
+      state: latest
+    when: ansible_distribution == "OracleLinux"
+
+- hosts: db_servers
+  become: true
+  tasks:
+
+  - name: Install MariaDB package (Oracle Linux)
+    dnf:
+      name: mariadb
+      state: latest
+    when: ansible_distribution == "OracleLinux"
+
+  - name: Install MariaDB package (Ubuntu)
+    apt:
+      name: mariadb-server
+      state: latest
+    when: ansible_distribution == "Ubuntu"
