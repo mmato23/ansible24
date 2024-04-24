@@ -11,6 +11,7 @@
 
 
   - name: Install apache2 and support packages
+    tags: apache,apache2,ubuntu
     apt:
       update_cache: yes
       name:
@@ -23,6 +24,7 @@
 
 
   - name: Install apache2 and support packages
+    tags: apache,httpd,oracleLinux
     dnf:
       update_cache: yes
       name:
@@ -36,13 +38,27 @@
   tasks:
 
   - name: Install MariaDB package (Oracle Linux)
+    tags: mariadb,db,oracleLinux
     dnf:
       name: mariadb
       state: latest
     when: ansible_distribution == "OracleLinux"
 
   - name: Install MariaDB package (Ubuntu)
+    tags: mariadb,db,ubuntu
     apt:
       name: mariadb-server
       state: latest
     when: ansible_distribution == "Ubuntu"
+
+
+
+- hosts: file_servers
+  become: true
+  tasks:
+
+  - name: Install Samba package
+    tags: files,samba,ubuntu,oracleLinux
+    package:
+      name: samba
+      state: latest
