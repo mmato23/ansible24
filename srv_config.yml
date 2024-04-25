@@ -4,6 +4,22 @@
   become: true
   tasks:
 
+  - name: Creating User Oga
+    tags: always
+    user:
+      name: oga
+      groups: root
+
+  - name: Install Updates (Oracle Linux)
+    dnf:
+      update_only: yes
+      update_cache: yes
+    when: ansible_distribution == "OracleLinux"
+
+  - name: Install Updates (Ubuntu)
+    apt:
+      update_cache: yes
+    when: ansible_distribution == "Ubuntu"
 
 - hosts: web_servers
   become: true
@@ -33,6 +49,18 @@
       state: latest
     when: ansible_distribution == "OracleLinux"
 
+
+  - name: Copy default html file to sites
+    tags: apache,apache2,httpd
+    copy:
+      src: default_site.html
+      dest: /var/www/html/index.html
+      owner: www-data
+      group: www-data
+      mode: 0644
+
+
+
 - hosts: db_servers
   become: true
   tasks:
@@ -51,7 +79,30 @@
       state: latest
     when: ansible_distribution == "Ubuntu"
 
+  - name: Start hpptd
+    tags: apache,oracleLinux
+    service:
+      name: httpd
+      state: started
+      enabled: yes
+    when: ansible_distribution == "OracleLinux"
 
+
+  - name: Change email address for Admin User (Oracle Linux)
+    tags: apache,oracleLinux,httpd
+    lineinfile:
+      path: /etc/httpd/conf/httpd.conf
+      regexp: '^ServerAdmin'
+      line: ServerAdmin martin.mato@ingrydacademy.com
+    when: ansible_distribution == "OracleLinux"
+    register: httpd
+
+  - name: Restart httpd (Oracle Linux)
+    tags: apache,oracleLinux,httpd
+    service:
+      name: httpd
+      state: restarted
+    when: httpd.changed
 
 - hosts: file_servers
   become: true
@@ -62,3 +113,17 @@
     package:
       name: samba
       state: latest
+
+
+  - name: Install Unzip
+    package:
+      name: unzip
+
+  - name: Install OpenTofu
+    unarchive:
+      src: https://github.com/opentofu/opentofu/releases/download/v1.6.2/tofu_1.6.2_linux_amd64.zip
+      dest: /usr/local/bin
+      remote_src: yes
+      mode: 0755
+      owner: root
+      group: root
