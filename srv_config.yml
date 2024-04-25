@@ -4,37 +4,23 @@
   become: true
   tasks:
 
-  - name: Creating User Oga
-    tags: always
-    user:
-      name: oga
-      groups: root
-
   - name: Add ssh key for Oga
     tags: always
     authorized_key:
       user: oga
       key: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJvB/M1QUCPPWSABeqmXHHkd/bGbeEBmvILuc/KNcAyh ansible
 
-  - name: Make Oga a sudoer
-    tags: always
-    copy:
-      src: sudoer_oga
-      dest: /etc/sudoers.d/oga
-      owner: root
-      group: root
-      mode: 0440
-
 
   - name: Install Updates (Oracle Linux)
     dnf:
-      update_only: yes
       update_cache: yes
+    changed_when: false
     when: ansible_distribution == "OracleLinux"
 
   - name: Install Updates (Ubuntu)
     apt:
       update_cache: yes
+    changed_when: false
     when: ansible_distribution == "Ubuntu"
 
 - hosts: web_servers
