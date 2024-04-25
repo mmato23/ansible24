@@ -1,0 +1,19 @@
+- name: Add ssh key for Oga
+  tags: always
+  authorized_key:
+    user: oga
+    key: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJvB/M1QUCPPWSABeqmXHHkd/bGbeEBmvILuc/KNcAyh ansible
+
+
+- name: Install Updates (Oracle Linux)
+  dnf:
+    update_cache: yes
+  changed_when: false
+  when: ansible_distribution == "OracleLinux"
+
+- name: Install Updates (Ubuntu)
+  apt:
+    update_cache: yes
+  changed_when: false
+  when: ansible_distribution == "Ubuntu"
+

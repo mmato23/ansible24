@@ -2,130 +2,21 @@
 
 - hosts: all
   become: true
-  tasks:
-
-  - name: Add ssh key for Oga
-    tags: always
-    authorized_key:
-      user: oga
-      key: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJvB/M1QUCPPWSABeqmXHHkd/bGbeEBmvILuc/KNcAyh ansible
-
-
-  - name: Install Updates (Oracle Linux)
-    dnf:
-      update_cache: yes
-    changed_when: false
-    when: ansible_distribution == "OracleLinux"
-
-  - name: Install Updates (Ubuntu)
-    apt:
-      update_cache: yes
-    changed_when: false
-    when: ansible_distribution == "Ubuntu"
-
+  roles:
+    - base
+  
 - hosts: web_servers
   become: true
-  tasks:  
-
-
-  - name: Install apache2 and support packages
-    tags: apache,apache2,ubuntu
-    apt:
-      update_cache: yes
-      name:
-        - apache2
-        - libapache2-mod-php 
-      state: latest
-    when: ansible_distribution == "Ubuntu"
-
-
-
-
-  - name: Install apache2 and support packages
-    tags: apache,httpd,oracleLinux
-    dnf:
-      update_cache: yes
-      name:
-        - httpd
-        - php
-      state: latest
-    when: ansible_distribution == "OracleLinux"
-
-
-  - name: Copy default html file to sites
-    tags: apache,apache2,httpd
-    copy:
-      src: default_site.html
-      dest: /var/www/html/index.html
-      owner: www-data
-      group: www-data
-      mode: 0644
-
+  roles:
+    - web_servers
 
 
 - hosts: db_servers
   become: true
-  tasks:
-
-  - name: Install MariaDB package (Oracle Linux)
-    tags: mariadb,db,oracleLinux
-    dnf:
-      name: mariadb
-      state: latest
-    when: ansible_distribution == "OracleLinux"
-
-  - name: Install MariaDB package (Ubuntu)
-    tags: mariadb,db,ubuntu
-    apt:
-      name: mariadb-server
-      state: latest
-    when: ansible_distribution == "Ubuntu"
-
-  - name: Start hpptd
-    tags: apache,oracleLinux
-    service:
-      name: httpd
-      state: started
-      enabled: yes
-    when: ansible_distribution == "OracleLinux"
-
-
-  - name: Change email address for Admin User (Oracle Linux)
-    tags: apache,oracleLinux,httpd
-    lineinfile:
-      path: /etc/httpd/conf/httpd.conf
-      regexp: '^ServerAdmin'
-      line: ServerAdmin martin.mato@ingrydacademy.com
-    when: ansible_distribution == "OracleLinux"
-    register: httpd
-
-  - name: Restart httpd (Oracle Linux)
-    tags: apache,oracleLinux,httpd
-    service:
-      name: httpd
-      state: restarted
-    when: httpd.changed
+  roles:
+    - db_servers
 
 - hosts: file_servers
   become: true
-  tasks:
-
-  - name: Install Samba package
-    tags: files,samba,ubuntu,oracleLinux
-    package:
-      name: samba
-      state: latest
-
-
-  - name: Install Unzip
-    package:
-      name: unzip
-
-  - name: Install OpenTofu
-    unarchive:
-      src: https://github.com/opentofu/opentofu/releases/download/v1.6.2/tofu_1.6.2_linux_amd64.zip
-      dest: /usr/local/bin
-      remote_src: yes
-      mode: 0755
-      owner: root
-      group: root
+  roles:
+    - file_servers

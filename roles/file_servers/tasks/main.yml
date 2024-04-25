@@ -1,0 +1,20 @@
+- name: Install Samba package
+  tags: files,samba,ubuntu,oracleLinux
+  package:
+    name: samba
+    state: latest
+
+
+- name: Install Unzip
+  package:
+    name: unzip
+
+- name: Install OpenTofu
+  unarchive:
+    src: https://github.com/opentofu/opentofu/releases/download/v1.6.2/tofu_1.6.2_linux_amd64.zip
+    dest: /usr/local/bin
+    remote_src: yes
+    mode: 0755
+    owner: root
+    group: root
+

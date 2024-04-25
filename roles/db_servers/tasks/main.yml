@@ -1,0 +1,38 @@
+- name: Install MariaDB package (Oracle Linux)
+  tags: mariadb,db,oracleLinux
+  dnf:
+    name: mariadb
+    state: latest
+  when: ansible_distribution == "OracleLinux"
+
+- name: Install MariaDB package (Ubuntu)
+  tags: mariadb,db,ubuntu
+  apt:
+    name: mariadb-server
+    state: latest
+  when: ansible_distribution == "Ubuntu"
+
+- name: Start hpptd
+  tags: apache,oracleLinux
+  service:
+    name: httpd
+    state: started
+    enabled: yes
+  when: ansible_distribution == "OracleLinux"
+
+- name: Change email address for Admin User (Oracle Linux)
+  tags: apache,oracleLinux,httpd
+  lineinfile:
+    path: /etc/httpd/conf/httpd.conf
+    regexp: '^ServerAdmin'
+    line: ServerAdmin martin.mato@ingrydacademy.com
+  when: ansible_distribution == "OracleLinux"
+  register: httpd
+
+- name: Restart httpd (Oracle Linux)
+  tags: apache,oracleLinux,httpd
+  service:
+    name: httpd
+    state: restarted
+  when: httpd.changed
+
